@@ -6,6 +6,12 @@
 <body>
     <h1>Plan Generado</h1>
     <pre>{{ plan }}</pre>
+    <h2>Simulación de Resultados</h2>
+    <ul>
+        {% for estado in estados %}
+            <li>{{ estado }}</li>
+        {% endfor %}
+    </ul>
     <a href="/">Volver</a>
 </body>
 </html>
