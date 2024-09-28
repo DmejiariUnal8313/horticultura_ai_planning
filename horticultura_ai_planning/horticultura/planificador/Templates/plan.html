@@ -2,16 +2,20 @@
 <html>
 <head>
     <title>Plan Generado</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
-    <h1>Plan Generado</h1>
-    <pre>{{ plan }}</pre>
-    <h2>Simulación de Resultados</h2>
-    <ul>
-        {% for estado in estados %}
-            <li>{{ estado }}</li>
-        {% endfor %}
-    </ul>
-    <a href="/">Volver</a>
+    <div class="container">
+        <h1>Plan Generado</h1>
+        <pre>{{ plan }}</pre>
+        <h2>Simulación de Resultados</h2>
+        <div class="table-responsive">
+            {{ df_estados|safe }}
+        </div>
+        <h2>Gráfico del Plan</h2>
+        {% load static %} <!-- Cargar las etiquetas estáticas -->
+        <img src="{% static 'plan_grafico.png' %}" alt="Gráfico del Plan" class="img-fluid">
+        <a href="/" class="btn btn-primary mt-3">Volver</a>
+    </div>
 </body>
 </html>
