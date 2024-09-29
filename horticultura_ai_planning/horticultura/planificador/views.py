@@ -4,10 +4,40 @@ from pyperplan.planner import _parse, _ground, _search
 from pyperplan.search import astar_search
 from pyperplan.heuristics.blind import BlindHeuristic
 import os
-import matplotlib
-matplotlib.use('Agg')  # Usar el backend 'Agg' para evitar problemas de GUI
-import matplotlib.pyplot as plt
 import pandas as pd
+
+
+def index(request):
+    """
+    Muestra la página principal del planificador.
+
+    Args:
+        request (HttpRequest): La solicitud HTTP.
+
+    Returns:
+        HttpResponse: La respuesta HTTP con la página principal del planificador.
+    """
+    return render(request, 'index.html')
+
+def mostrar_dominio(request):
+    """
+    Muestra el contenido del archivo PDDL en una página web.
+
+    Args:
+        request (HttpRequest): La solicitud HTTP.
+
+    Returns:
+        HttpResponse: La respuesta HTTP con el contenido del archivo PDDL.
+    """
+    # Obtener la ruta absoluta del directorio actual
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    domain_file = os.path.join(base_dir, 'domain.pddl')
+    
+    # Leer el contenido del archivo
+    with open(domain_file, 'r') as file:
+        domain_content = file.read()
+    
+    return render(request, 'dominio.html', {'domain_content': domain_content})
 
 def generar_plan(request):
     """
@@ -19,7 +49,6 @@ def generar_plan(request):
     Returns:
         HttpResponse: La respuesta HTTP con el plan generado y la simulación de resultados.
     """
-
     if request.method == 'POST':
         # Obtener la ruta absoluta del directorio actual
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -59,37 +88,30 @@ def generar_plan(request):
                 estado_actual[planta] = "cosechada"
             estados.append(f"Después de {action}: {estado_actual.copy()}")
         
-        # Generar gráfico
-        generar_grafico(plan, base_dir)
-        
         # Convertir estados a DataFrame para mostrar en tabla
         df_estados = pd.DataFrame(estados, columns=['Estado'])
         
         return render(request, 'plan.html', {'plan': plan_str, 'estados': estados, 'df_estados': df_estados.to_html(classes='table table-striped')})
     return render(request, 'index.html')
 
-def generar_grafico(plan, base_dir):
+def mostrar_problema(request):
     """
-    Genera un gráfico del plan y lo guarda como una imagen.
+    Muestra el contenido del archivo del problema PDDL en una página web.
 
     Args:
-        plan (list): La lista de acciones del plan.
-        base_dir (str): El directorio base donde se guardará la imagen.
+        request (HttpRequest): La solicitud HTTP.
+
+    Returns:
+        HttpResponse: La respuesta HTTP con el contenido del archivo del problema PDDL.
     """
+    # Obtener la ruta absoluta del directorio actual
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    problem_file = os.path.join(base_dir, 'problem.pddl')
+    
+    # Leer el contenido del archivo
+    with open(problem_file, 'r') as file:
+        problem_content = file.read()
+    
+    return render(request, 'problema.html', {'problem_content': problem_content})
 
 
-    fig, ax = plt.subplots()
-    y = range(len(plan))
-    x = [str(action) for action in plan]
-    
-    ax.barh(y, [1] * len(plan), align='center')
-    ax.set_yticks(y)
-    ax.set_yticklabels(x)
-    ax.invert_yaxis()  # Invertir el eje y para que el primer paso esté en la parte superior
-    ax.set_xlabel('Acciones')
-    ax.set_title('Plan de Horticultura')
-    
-    # Guardar el gráfico como una imagen
-    grafico_path = os.path.join(base_dir, 'static', 'plan_grafico.png')
-    plt.savefig(grafico_path)
-    plt.close(fig)

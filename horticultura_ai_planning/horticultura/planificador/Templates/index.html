@@ -8,6 +8,12 @@
     <form action="/" method="post">
         {% csrf_token %}
         <button type="submit">Generar Plan</button>
+        <button type="button" onclick="window.location.href='/plan'">Ver Plan</button>
+        <button typy="button" onclick="window.location.href='/simulacion'">Simulación</button>
+        <button type="submit" name="reset">Reset</button>
+        <button type="submit" name="exit">Exit</button>
+        <button type="button" onclick="window.location.href='/dominio'">ver dominio</button>
+        <button type="button" onclick="window.location.href='/problema'">ver problema</button>  
     </form>
 </body>
 </html>

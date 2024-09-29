@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'horticultura.urls'
+ROOT_URLCONF = 'horticultura_page.urls'
 
 TEMPLATES = [
     {
@@ -69,7 +69,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'horticultura.wsgi.application'
+WSGI_APPLICATION = 'horticultura_page.wsgi.application'
 
 
 # Database

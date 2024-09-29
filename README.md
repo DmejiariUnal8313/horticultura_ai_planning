@@ -1,8 +1,8 @@
-# Proyecto de Planificación en IA para Horticultura
+# Proyecto de Planificación de Horticultura
 
 ## Introducción
 
-Este proyecto tiene como objetivo desarrollar una aplicación web para la planificación de tareas de horticultura utilizando archivos PDDL (Planning Domain Definition Language). La aplicación permite a los usuarios generar planes basados en dominios y problemas definidos en PDDL y visualizar estos planes de manera gráfica.
+Este proyecto tiene como objetivo desarrollar una aplicación web para la planificación de tareas de horticultura utilizando archivos PDDL (Planning Domain Definition Language). La aplicación permite a los usuarios generar planes basados en dominios y problemas definidos en PDDL y visualizar estos planes de manera clara en una tabla.
 
 ## Estructura del Proyecto
 
@@ -44,9 +44,6 @@ from pyperplan.planner import _parse, _ground, _search
 from pyperplan.search import astar_search
 from pyperplan.heuristics.blind import BlindHeuristic
 import os
-import matplotlib
-matplotlib.use('Agg')  # Usar el backend 'Agg' para evitar problemas de GUI
-import matplotlib.pyplot as plt
 import pandas as pd
 
 def generar_plan(request):
@@ -64,17 +61,17 @@ def generar_plan(request):
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         domain_file = os.path.join(base_dir, 'domain.pddl')
         problem_file = os.path.join(base_dir, 'problem.pddl')
-  
+        
         parser = Parser(domain_file, problem_file)
         domain = parser.parse_domain()
         problem = parser.parse_problem(domain)
-  
+        
         task = _ground(problem)
         heuristic = BlindHeuristic(task)
         plan = _search(task, astar_search, heuristic)
-  
+        
         plan_str = '\n'.join(str(action) for action in plan)
-  
+        
         # Simulación de resultados
         estados = []
         estado_actual = {}
@@ -97,39 +94,12 @@ def generar_plan(request):
                 planta = str(action).split()[1]
                 estado_actual[planta] = "cosechada"
             estados.append(f"Después de {action}: {estado_actual.copy()}")
-  
-        # Generar gráfico
-        generar_grafico(plan, base_dir)
-  
+        
         # Convertir estados a DataFrame para mostrar en tabla
         df_estados = pd.DataFrame(estados, columns=['Estado'])
-  
+        
         return render(request, 'plan.html', {'plan': plan_str, 'estados': estados, 'df_estados': df_estados.to_html(classes='table table-striped')})
     return render(request, 'index.html')
-
-def generar_grafico(plan, base_dir):
-    """
-    Genera un gráfico del plan y lo guarda como una imagen.
-
-    Args:
-        plan (list): La lista de acciones del plan.
-        base_dir (str): El directorio base donde se guardará la imagen.
-    """
-    fig, ax = plt.subplots()
-    y = range(len(plan))
-    x = [str(action) for action in plan]
-  
-    ax.barh(y, [1] * len(plan), align='center')
-    ax.set_yticks(y)
-    ax.set_yticklabels(x)
-    ax.invert_yaxis()  # Invertir el eje y para que el primer paso esté en la parte superior
-    ax.set_xlabel('Acciones')
-    ax.set_title('Plan de Horticultura')
-  
-    # Guardar el gráfico como una imagen
-    grafico_path = os.path.join(base_dir, 'static', 'plan_grafico.png')
-    plt.savefig(grafico_path)
-    plt.close(fig)
 ```
 
 ### `urls.py`
@@ -175,6 +145,64 @@ Este archivo define el problema de horticultura en PDDL.
   )
 )
 ```
+
+### `domain.pddl`
+Este archivo define el dominio de horticultura en PDDL.
+```
+(define (domain horticultura)
+  (:requirements :strips :typing :action-costs)
+  
+  (:types
+    planta herramienta lugar
+  )
+  
+  (:predicates
+    (en-lugar ?p - planta ?l - lugar)
+    (tiene-herramienta ?h - herramienta)
+    (plantada ?p - planta)
+    (regada ?p - planta)
+    (fertilizada ?p - planta)
+    (podada ?p - planta)
+    (cosechada ?p - planta)
+  )
+  
+  (:action plantar
+    :parameters (?p - planta ?l - lugar)
+    :precondition (and (en-lugar ?p ?l))
+    :effect (plantada ?p)
+    :cost 1
+  )
+  
+  (:action regar
+    :parameters (?p - planta)
+    :precondition (and (plantada ?p))
+    :effect (regada ?p)
+    :cost 1
+  )
+  
+  (:action fertilizar
+    :parameters (?p - planta)
+    :precondition (and (plantada ?p))
+    :effect (fertilizada ?p)
+    :cost 2
+  )
+  
+  (:action podar
+    :parameters (?p - planta)
+    :precondition (and (plantada ?p))
+    :effect (podada ?p)
+    :cost 2
+  )
+  
+  (:action cosechar
+    :parameters (?p - planta)
+    :precondition (and (plantada ?p) (regada ?p) (fertilizada ?p) (podada ?p))
+    :effect (cosechada ?p)
+    :cost 3
+  )
+)
+```
+
 ## Ejecución del Proyecto
 Para ejecutar el proyecto, sigue estos pasos:
 
