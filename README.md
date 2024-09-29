@@ -193,5 +193,6 @@ pip install -r requirements.txt
 cd horticultura_ai_planning
 cd horticultura
 python manage.py runserver
+```
 
 ### 4. Abre tu navegador y ve a http://127.0.0.1:8000/ para ver la aplicación en acción.
