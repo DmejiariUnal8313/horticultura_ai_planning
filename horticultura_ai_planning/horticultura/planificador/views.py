@@ -10,6 +10,16 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 def generar_plan(request):
+    """
+    Genera un plan basado en los archivos PDDL y lo muestra en una página web.
+
+    Args:
+        request (HttpRequest): La solicitud HTTP.
+
+    Returns:
+        HttpResponse: La respuesta HTTP con el plan generado y la simulación de resultados.
+    """
+
     if request.method == 'POST':
         # Obtener la ruta absoluta del directorio actual
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -59,6 +69,15 @@ def generar_plan(request):
     return render(request, 'index.html')
 
 def generar_grafico(plan, base_dir):
+    """
+    Genera un gráfico del plan y lo guarda como una imagen.
+
+    Args:
+        plan (list): La lista de acciones del plan.
+        base_dir (str): El directorio base donde se guardará la imagen.
+    """
+
+
     fig, ax = plt.subplots()
     y = range(len(plan))
     x = [str(action) for action in plan]
