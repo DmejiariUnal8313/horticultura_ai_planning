@@ -2,18 +2,19 @@
 <html>
 <head>
     <title>Planificador de Horticultura</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
-    <h1>Planificador de Horticultura</h1>
-    <form action="/" method="post">
-        {% csrf_token %}
-        <button type="submit">Generar Plan</button>
-        <button type="button" onclick="window.location.href='/plan'">Ver Plan</button>
-        <button typy="button" onclick="window.location.href='/simulacion'">Simulación</button>
-        <button type="submit" name="reset">Reset</button>
-        <button type="submit" name="exit">Exit</button>
-        <button type="button" onclick="window.location.href='/dominio'">ver dominio</button>
-        <button type="button" onclick="window.location.href='/problema'">ver problema</button>  
-    </form>
+    <div class="container">
+        <h1>Planificador de Horticultura</h1>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="action" value="generar_plan" class="btn btn-primary">Generar Plan</button>
+            <a href="{% url 'ver_plan' %}" class="btn btn-secondary">Ver Plan</a>
+            <a href="{% url 'simulacion' %}" class="btn btn-secondary">Simulación</a>
+            <a href="{% url 'mostrar_dominio' %}" class="btn btn-info">Ver Dominio</a>
+            <a href="{% url 'mostrar_problema' %}" class="btn btn-info">Ver Problema</a>
+        </form>
+    </div>
 </body>
 </html>

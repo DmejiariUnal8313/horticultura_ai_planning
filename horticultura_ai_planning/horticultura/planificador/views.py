@@ -1,11 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from pyperplan.pddl.parser import Parser
 from pyperplan.planner import _parse, _ground, _search
 from pyperplan.search import astar_search
 from pyperplan.heuristics.blind import BlindHeuristic
 import os
-import pandas as pd
-
 
 def index(request):
     """
@@ -17,6 +15,9 @@ def index(request):
     Returns:
         HttpResponse: La respuesta HTTP con la página principal del planificador.
     """
+    if request.method == 'POST':
+        if 'action' in request.POST and request.POST['action'] == 'generar_plan':
+            return redirect('/generar_plan')
     return render(request, 'index.html')
 
 def mostrar_dominio(request):
@@ -29,70 +30,11 @@ def mostrar_dominio(request):
     Returns:
         HttpResponse: La respuesta HTTP con el contenido del archivo PDDL.
     """
-    # Obtener la ruta absoluta del directorio actual
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     domain_file = os.path.join(base_dir, 'domain.pddl')
-    
-    # Leer el contenido del archivo
     with open(domain_file, 'r') as file:
         domain_content = file.read()
-    
     return render(request, 'dominio.html', {'domain_content': domain_content})
-
-def generar_plan(request):
-    """
-    Genera un plan basado en los archivos PDDL y lo muestra en una página web.
-
-    Args:
-        request (HttpRequest): La solicitud HTTP.
-
-    Returns:
-        HttpResponse: La respuesta HTTP con el plan generado y la simulación de resultados.
-    """
-    if request.method == 'POST':
-        # Obtener la ruta absoluta del directorio actual
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        domain_file = os.path.join(base_dir, 'domain.pddl')
-        problem_file = os.path.join(base_dir, 'problem.pddl')
-        
-        parser = Parser(domain_file, problem_file)
-        domain = parser.parse_domain()
-        problem = parser.parse_problem(domain)
-        
-        task = _ground(problem)
-        heuristic = BlindHeuristic(task)
-        plan = _search(task, astar_search, heuristic)
-        
-        plan_str = '\n'.join(str(action) for action in plan)
-        
-        # Simulación de resultados
-        estados = []
-        estado_actual = {}
-        for action in plan:
-            estados.append(f"Antes de {action}: {estado_actual.copy()}")
-            # Actualizar estado_actual según la acción
-            if "plantar" in str(action):
-                planta = str(action).split()[1]
-                estado_actual[planta] = "plantada"
-            elif "regar" in str(action):
-                planta = str(action).split()[1]
-                estado_actual[planta] = "regada"
-            elif "fertilizar" in str(action):
-                planta = str(action).split()[1]
-                estado_actual[planta] = "fertilizada"
-            elif "podar" in str(action):
-                planta = str(action).split()[1]
-                estado_actual[planta] = "podada"
-            elif "cosechar" in str(action):
-                planta = str(action).split()[1]
-                estado_actual[planta] = "cosechada"
-            estados.append(f"Después de {action}: {estado_actual.copy()}")
-        
-        # Convertir estados a DataFrame para mostrar en tabla
-        df_estados = pd.DataFrame(estados, columns=['Estado'])
-        
-        return render(request, 'plan.html', {'plan': plan_str, 'estados': estados, 'df_estados': df_estados.to_html(classes='table table-striped')})
-    return render(request, 'index.html')
 
 def mostrar_problema(request):
     """
@@ -104,14 +46,78 @@ def mostrar_problema(request):
     Returns:
         HttpResponse: La respuesta HTTP con el contenido del archivo del problema PDDL.
     """
-    # Obtener la ruta absoluta del directorio actual
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     problem_file = os.path.join(base_dir, 'problem.pddl')
-    
-    # Leer el contenido del archivo
     with open(problem_file, 'r') as file:
         problem_content = file.read()
-    
     return render(request, 'problema.html', {'problem_content': problem_content})
+
+def generar_plan(request):
+    """
+    Genera un plan basado en los archivos PDDL y lo guarda en la sesión.
+
+    Args:
+        request (HttpRequest): La solicitud HTTP.
+
+    Returns:
+        HttpResponse: Redirige a la página de ver plan.
+    """
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    domain_file = os.path.join(base_dir, 'domain.pddl')
+    problem_file = os.path.join(base_dir, 'problem.pddl')
+
+    # Parsear los archivos PDDL
+    parser = Parser(domain_file, problem_file)
+    domain = parser.parse_domain()
+    problem = parser.parse_problem(domain)
+
+    # Generar el plan
+    task = _ground(problem)
+    heuristic = BlindHeuristic(task)
+    plan = astar_search(task, heuristic)
+
+    # Guardar el plan en la sesión
+    plan_steps = [str(step) for step in plan]
+    request.session['plan_steps'] = plan_steps
+    request.session['initial_state'] = [str(fact) for fact in problem.initial_state]
+    request.session['goal'] = [str(fact) for fact in problem.goal]
+
+    return redirect('/ver_plan')
+
+def ver_plan(request):
+    """
+    Muestra el plan generado guardado en la sesión.
+
+    Args:
+        request (HttpRequest): La solicitud HTTP.
+
+    Returns:
+        HttpResponse: La respuesta HTTP con el plan generado.
+    """
+    plan_steps = request.session.get('plan_steps', [])
+    return render(request, 'plan.html', {'plan_steps': plan_steps})
+
+def simulacion(request):
+    """
+    Muestra una simulación del plan generado en una página web.
+
+    Args:
+        request (HttpRequest): La solicitud HTTP.
+
+    Returns:
+        HttpResponse: La respuesta HTTP con la simulación del plan.
+    """
+    initial_state = request.session.get('initial_state', [])
+    plan_steps = request.session.get('plan_steps', [])
+    goal = request.session.get('goal', [])
+
+    simulacion_content = "Estado inicial:\n"
+    simulacion_content += "\n".join(initial_state)
+    simulacion_content += "\n\nPasos del plan:\n"
+    simulacion_content += "\n".join(plan_steps)
+    simulacion_content += "\n\nEstado final ideal:\n"
+    simulacion_content += "\n".join(goal)
+
+    return render(request, 'simulacion.html', {'simulacion_content': simulacion_content})
 
 

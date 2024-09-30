@@ -1,11 +1,11 @@
 from django.urls import path
-from . import views
+from .views import index, generar_plan, ver_plan, simulacion, mostrar_dominio, mostrar_problema
 
 urlpatterns = [
-    path('', views.generar_plan, name='generar_plan'),
-    path('dominio/', views.mostrar_dominio, name='mostrar_dominio'),
-    path('index/', views.index, name='index'),
-    path('plan/', views.generar_plan, name='generar_plan'),
-    path('problema/', views.mostrar_problema, name='mostrar_problema'),
-    
+    path('', index, name='index'),
+    path('generar_plan/', generar_plan, name='generar_plan'),
+    path('ver_plan/', ver_plan, name='ver_plan'),
+    path('simulacion/', simulacion, name='simulacion'),
+    path('dominio/', mostrar_dominio, name='mostrar_dominio'),
+    path('problema/', mostrar_problema, name='mostrar_problema'),
 ]
