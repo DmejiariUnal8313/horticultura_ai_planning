@@ -1,14 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Plan Generado</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <title>Planes Generados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #f9f9f9;
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        .plan-container {
+            margin-bottom: 20px;
+        }
+        .generate-button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .generate-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Plan Generado</h1>
-        <pre>{{ plan_steps|join:"\n" }}</pre>
-        <a href="/" class="btn btn-primary mt-3">Volver</a>
-    </div>
+    <h1>Planes Generados</h1>
+    {% if plans %}
+        {% for plan in plans %}
+            <div class="plan-container">
+                <h2>Plan {{ forloop.counter }}</h2>
+                <ul>
+                    {% for step in plan %}
+                        <li>{{ step }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No hay planes generados.</p>
+    {% endif %}
+    <a href="/generar_plan" class="generate-button">Generar nuevos planes</a>
 </body>
 </html>

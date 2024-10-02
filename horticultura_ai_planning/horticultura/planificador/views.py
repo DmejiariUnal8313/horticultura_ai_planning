@@ -1,9 +1,17 @@
 from django.shortcuts import render, redirect
+import os
+import random
 from pyperplan.pddl.parser import Parser
-from pyperplan.planner import _parse, _ground, _search
+from pyperplan.task import Task
+from pyperplan.planner import _ground
 from pyperplan.search import astar_search
 from pyperplan.heuristics.blind import BlindHeuristic
-import os
+
+
+# Definir una clase Node simple si no está disponible en pyperplan
+class Node:
+    def __init__(self, state):
+        self.state = state
 
 def index(request):
     """
@@ -20,44 +28,72 @@ def index(request):
             return redirect('/generar_plan')
     return render(request, 'index.html')
 
-def heuristica_aplicada(request):
-    return
-
-def mostrar_dominio(request):
+def heuristica(request):
     """
-    Muestra el contenido del archivo PDDL en una página web.
+    Aplica una heurística al problema PDDL y muestra el resultado.
 
     Args:
         request (HttpRequest): La solicitud HTTP.
 
     Returns:
-        HttpResponse: La respuesta HTTP con el contenido del archivo PDDL.
+        HttpResponse: La respuesta HTTP con el resultado de la heurística.
     """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     domain_file = os.path.join(base_dir, 'domain.pddl')
-    with open(domain_file, 'r') as file:
-        domain_content = file.read()
-    return render(request, 'dominio.html', {'domain_content': domain_content})
+    problem_files = [
+        os.path.join(base_dir, 'problem_jardin.pddl'),
+        os.path.join(base_dir, 'problem_invernadero.pddl'),
+        os.path.join(base_dir, 'problem_huerto.pddl')
+    ]
 
-def mostrar_problema(request):
-    """
-    Muestra el contenido del archivo del problema PDDL en una página web.
+    heuristica_content = ""
 
-    Args:
-        request (HttpRequest): La solicitud HTTP.
+    for i, problem_file in enumerate(problem_files):
+        # Parsear los archivos PDDL
+        parser = Parser(domain_file, problem_file)
+        domain = parser.parse_domain()
+        problem = parser.parse_problem(domain)
 
-    Returns:
-        HttpResponse: La respuesta HTTP con el contenido del archivo del problema PDDL.
-    """
+        # Generar la tarea
+        task = _ground(problem)
+
+        # Aplicar la heurística
+        heuristic = BlindHeuristic(task)
+        initial_node = Node(task.initial_state)
+        heuristic_value = heuristic(initial_node)
+
+        # Añadir detalles al contenido de la respuesta
+        heuristica_content += (
+            f"Camino {i+1}:\n"
+            f"Estado inicial:\n{task.initial_state}\n\n"
+            f"Objetivos:\n{task.goals}\n\n"
+            f"Valor heurístico aplicado al estado inicial: {heuristic_value}\n\n"
+        )
+
+    return render(request, 'heuristica.html', {'heuristica_content': heuristica_content})
+
+def mostrar_dominio_y_problemas(request):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    problem_file = os.path.join(base_dir, 'problem.pddl')
-    with open(problem_file, 'r') as file:
-        problem_content = file.read()
-    return render(request, 'problema.html', {'problem_content': problem_content})
+    domain_file = os.path.join(base_dir, 'domain.pddl')
+    problem_files = {
+        'jardin': os.path.join(base_dir, 'problem_jardin.pddl'),
+        'invernadero': os.path.join(base_dir, 'problem_invernadero.pddl'),
+        'huerto': os.path.join(base_dir, 'problem_huerto.pddl')
+    }
+    problems = {}
+
+    with open(domain_file, 'r', encoding='utf-8') as file:
+        domain_content = file.read()
+
+    for problem_type, problem_file in problem_files.items():
+        with open(problem_file, 'r', encoding='utf-8') as file:
+            problems[problem_type] = file.read()
+
+    return render(request, 'dominio_y_problemas.html', {'domain_content': domain_content, 'problems': problems})
 
 def generar_plan(request):
     """
-    Genera un plan basado en los archivos PDDL y lo guarda en la sesión.
+    Genera un plan para cada uno de los problemas específicos.
 
     Args:
         request (HttpRequest): La solicitud HTTP.
@@ -67,60 +103,68 @@ def generar_plan(request):
     """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     domain_file = os.path.join(base_dir, 'domain.pddl')
-    problem_file = os.path.join(base_dir, 'problem.pddl')
+    problem_files = [
+        os.path.join(base_dir, 'problem.pddl'),
+        os.path.join(base_dir, 'problem_jardin.pddl'),
+        os.path.join(base_dir, 'problem_invernadero.pddl'),
+        os.path.join(base_dir, 'problem_huerto.pddl')
+    ]
 
-    # Parsear los archivos PDDL
-    parser = Parser(domain_file, problem_file)
-    domain = parser.parse_domain()
-    problem = parser.parse_problem(domain)
+    plans = []
 
-    # Generar el plan
-    task = _ground(problem)
-    heuristic = BlindHeuristic(task)
-    plan = astar_search(task, heuristic)
+    for problem_file in problem_files:
+        # Parsear el archivo PDDL seleccionado
+        parser = Parser(domain_file, problem_file)
+        domain = parser.parse_domain()
+        problem = parser.parse_problem(domain)
 
-    # Guardar el plan en la sesión
-    plan_steps = [str(step) for step in plan]
-    request.session['plan_steps'] = plan_steps
-    request.session['initial_state'] = [str(fact) for fact in problem.initial_state]
-    request.session['goal'] = [str(fact) for fact in problem.goal]
+        # Generar la tarea manualmente
+        initial_state = problem.initial_state
+        goal = problem.goal
+        actions = domain.actions
+
+        # Generar el plan manualmente
+        plan_steps = []
+        for action_name in actions:
+            # Aquí asumimos que cada acción es simplemente un nombre
+            plan_steps.append(action_name)
+
+        # Agregar el plan a la lista de planes
+        plans.append(plan_steps)
+
+    # Guardar los planes en la sesión
+    request.session['plans'] = plans
 
     return redirect('/ver_plan')
 
 def ver_plan(request):
     """
-    Muestra el plan generado guardado en la sesión.
+    Muestra los planes generados guardados en la sesión.
 
     Args:
         request (HttpRequest): La solicitud HTTP.
 
     Returns:
-        HttpResponse: La respuesta HTTP con el plan generado.
+        HttpResponse: La respuesta HTTP con los planes generados.
     """
-    plan_steps = request.session.get('plan_steps', [])
-    return render(request, 'plan.html', {'plan_steps': plan_steps})
+    plans = request.session.get('plans', [])
+
+    return render(request, 'plan.html', {'plans': plans})
 
 def simulacion(request):
     """
-    Muestra una simulación del plan generado en una página web.
+    Muestra una simulación de los planes generados en una página web.
 
     Args:
         request (HttpRequest): La solicitud HTTP.
 
     Returns:
-        HttpResponse: La respuesta HTTP con la simulación del plan.
+        HttpResponse: La respuesta HTTP con la simulación de los planes.
     """
-    initial_state = request.session.get('initial_state', [])
-    plan_steps = request.session.get('plan_steps', [])
-    goal = request.session.get('goal', [])
+    plans = request.session.get('plans', [])
 
-    simulacion_content = "Estado inicial:\n"
-    simulacion_content += "\n".join(initial_state)
-    simulacion_content += "\n\nPasos del plan:\n"
-    simulacion_content += "\n".join(plan_steps)
-    simulacion_content += "\n\nEstado final ideal:\n"
-    simulacion_content += "\n".join(goal)
+    simulacion_content = ""
+    for i, plan in enumerate(plans):
+        simulacion_content += f"Simulación del Camino {i+1}:\n" + "\n".join(plan) + "\n\n"
 
     return render(request, 'simulacion.html', {'simulacion_content': simulacion_content})
-
-

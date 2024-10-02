@@ -23,6 +23,12 @@
     (conectado camino2 huerto)
     (conectado huerto camino3)
     (conectado camino3 jardin)
+    (en-camino camino1 jardin)
+    (en-camino camino1 invernadero)
+    (en-camino camino2 invernadero)
+    (en-camino camino2 huerto)
+    (en-camino camino3 huerto)
+    (en-camino camino3 jardin)
   )
   
   (:goal

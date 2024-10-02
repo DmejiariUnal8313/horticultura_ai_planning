@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seleccionar Mejor Plan</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Seleccionar Mejor Plan</h1>
+        <form method="post">
+            {% csrf_token %}
+            {% for plan in plans %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="mejor_plan" id="plan{{ forloop.counter }}" value="{{ forloop.counter }}">
+                    <label class="form-check-label" for="plan{{ forloop.counter }}">
+                        Camino {{ forloop.counter }}
+                    </label>
+                    <pre>{{ plan|join:"\n" }}</pre>
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-primary mt-3">Seleccionar</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dominio y Problemas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        pre {
+            background: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            overflow: auto;
+        }
+        .problem-container {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dominio y Problemas</h1>
+    <h2>Dominio</h2>
+    <pre>{{ domain_content }}</pre>
+    <h2>Problemas</h2>
+    {% for problem_type, problem_content in problems.items %}
+        <div class="problem-container">
+            <h3>{{ problem_type|capfirst }}</h3>
+            <pre>{{ problem_content }}</pre>
+        </div>
+    {% endfor %}
+</body>
+</html>

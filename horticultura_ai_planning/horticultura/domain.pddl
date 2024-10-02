@@ -2,7 +2,7 @@
   (:requirements :strips :typing :action-costs)
   
   (:types
-    planta herramienta lugar camino  ; Anadir 'camino' aqui
+    planta herramienta lugar camino calidad ; Anadir 'camino' aqui
   )
   
   (:predicates
@@ -14,6 +14,7 @@
     (podada ?p - planta)
     (cosechada ?p - planta)
     (conectado ?l1 - lugar ?l2 - lugar)  ; Anadir predicado 'conectado'
+    (todas_plantas_cultivadas)  ; Añadir predicado 'todas_plantas_cultivadas'
   )
   
   (:action plantar
