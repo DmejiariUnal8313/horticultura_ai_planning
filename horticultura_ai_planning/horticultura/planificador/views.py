@@ -20,6 +20,9 @@ def index(request):
             return redirect('/generar_plan')
     return render(request, 'index.html')
 
+def heuristica_aplicada(request):
+    return
+
 def mostrar_dominio(request):
     """
     Muestra el contenido del archivo PDDL en una página web.
