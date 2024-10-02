@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import index, generar_plan, ver_plan, simulacion, mostrar_dominio, mostrar_problema
+from .views import index, generar_plan, ver_plan, simulacion, mostrar_dominio, mostrar_problema, heuristica_aplicada
 
 urlpatterns = [
     path('', index, name='index'),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('simulacion/', simulacion, name='simulacion'),
     path('dominio/', mostrar_dominio, name='mostrar_dominio'),
     path('problema/', mostrar_problema, name='mostrar_problema'),
+    path('heuristica_aplicada/', heuristica_aplicada, name='heuristica_aplicada'),
 ]
