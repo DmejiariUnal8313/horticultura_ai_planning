@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
     <title>Planes Generados</title>
     <style>
         body {
@@ -64,11 +65,11 @@
                 <h2>Plan para {{ plan.problem_file }}</h2>
                 <div class="state">
                     <p><strong>Estado Inicial:</strong></p>
-                    <p>{{ plan.initial_state }}</p>
+                    <pre>{{ plan.initial_state }}</pre>
                 </div>
                 <div class="goal">
                     <p><strong>Objetivo:</strong></p>
-                    <p>{{ plan.goal }}</p>
+                    <pre>{{ plan.goal }}</pre>
                 </div>
                 <p><strong>Acciones:</strong></p>
                 <ul>
@@ -78,6 +79,7 @@
                 </ul>
             </div>
         {% endfor %}
+        <a href="/" class="btn btn-primary mt-3">Volver</a>
     </div>
 </body>
 </html>

@@ -2,10 +2,10 @@ from django.shortcuts import render, redirect
 import os
 import random
 from pyperplan.pddl.parser import Parser
-from pyperplan.task import Task
 from pyperplan.planner import _ground
 from pyperplan.search import astar_search
 from pyperplan.heuristics.blind import BlindHeuristic
+from pyperplan.heuristics.lm_cut import LmCutHeuristic
 
 
 # Definir una clase Node simple si no está disponible en pyperplan
@@ -58,7 +58,7 @@ def heuristica(request):
         task = _ground(problem)
 
         # Aplicar la heurística
-        heuristic = BlindHeuristic(task)
+        heuristic = LmCutHeuristic(task)  # Usar la nueva heurística
         initial_node = Node(task.initial_state)
         heuristic_value = heuristic(initial_node)
 
@@ -78,7 +78,8 @@ def mostrar_dominio_y_problemas(request):
     problem_files = {
         'jardin': os.path.join(base_dir, 'problem_jardin.pddl'),
         'invernadero': os.path.join(base_dir, 'problem_invernadero.pddl'),
-        'huerto': os.path.join(base_dir, 'problem_huerto.pddl')
+        'huerto': os.path.join(base_dir, 'problem_huerto.pddl'),
+        'general': os.path.join(base_dir, 'problem.pddl')
     }
     problems = {}
 
@@ -113,6 +114,10 @@ def generar_plan(request):
     plans = []
 
     for problem_file in problem_files:
+        # Leer el contenido del archivo problem.pddl
+        with open(problem_file, 'r') as file:
+            problem_content = file.read()
+
         # Parsear el archivo PDDL seleccionado
         parser = Parser(domain_file, problem_file)
         domain = parser.parse_domain()
@@ -128,8 +133,12 @@ def generar_plan(request):
         # Convertir el plan a una lista de nombres de acciones
         plan_steps = [str(action) for action in plan]
 
-        # Convertir objetos complejos a tipos de datos simples
-        initial_state_str = "\n".join(sorted(str(fact) for fact in task.initial_state))
+        # Extraer el estado inicial del contenido del archivo problem.pddl
+        init_start = problem_content.find('(:init') + len('(:init')
+        init_end = problem_content.find(')', init_start)
+        initial_state_str = problem_content[init_start:init_end].strip()
+
+        # Convertir el objetivo a una cadena de texto legible
         goal_str = "\n".join(sorted(str(goal) for goal in task.goals))
 
         # Agregar detalles del plan
@@ -155,20 +164,4 @@ def ver_plan(request):
     plans = request.session.get('plans', [])
     return render(request, 'ver_plan.html', {'plans': plans})
 
-def simulacion(request):
-    """
-    Muestra una simulación de los planes generados en una página web.
 
-    Args:
-        request (HttpRequest): La solicitud HTTP.
-
-    Returns:
-        HttpResponse: La respuesta HTTP con la simulación de los planes.
-    """
-    plans = request.session.get('plans', [])
-
-    simulacion_content = ""
-    for i, plan in enumerate(plans):
-        simulacion_content += f"Simulación del Camino {i+1}:\n" + "\n".join(plan) + "\n\n"
-
-    return render(request, 'simulacion.html', {'simulacion_content': simulacion_content})
