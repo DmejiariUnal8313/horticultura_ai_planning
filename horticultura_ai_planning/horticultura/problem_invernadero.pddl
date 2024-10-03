@@ -16,8 +16,8 @@
     (tiene-herramienta tijeras)
     (conectado invernadero camino2)
   )
-  
-  (:goal
+
+(:goal
     (and
       (cosechada planta2)
       (cosechada planta5)

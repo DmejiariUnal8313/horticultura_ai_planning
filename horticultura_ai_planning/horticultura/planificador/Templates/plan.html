@@ -1,58 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Planes Generados</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            background: #f9f9f9;
-            margin: 5px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-        }
-        .plan-container {
-            margin-bottom: 20px;
-        }
-        .generate-button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        .generate-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
-    <h1>Planes Generados</h1>
-    {% if plans %}
+    <div class="container">
+        <h1>Planes Generados</h1>
         {% for plan in plans %}
-            <div class="plan-container">
-                <h2>Plan {{ forloop.counter }}</h2>
-                <ul>
-                    {% for step in plan %}
-                        <li>{{ step }}</li>
-                    {% endfor %}
-                </ul>
+            <h2>Plan para {{ plan.problem_file }}</h2>
+            <div class="state">
+                <p><strong>Estado Inicial:</strong></p>
+                <pre>{{ plan.initial_state }}</pre>
             </div>
+            <div class="goal">
+                <p><strong>Objetivo:</strong></p>
+                <pre>{{ plan.goal }}</pre>
+            </div>
+            <p><strong>Acciones:</strong></p>
+            <ul>
+                {% for action in plan.actions %}
+                    <li>{{ action.name }} {{ action.parameters }}</li>
+                {% endfor %}
+            </ul>
         {% endfor %}
-    {% else %}
-        <p>No hay planes generados.</p>
-    {% endif %}
-    <a href="/generar_plan" class="generate-button">Generar nuevos planes</a>
+        <a href="/" class="btn btn-primary mt-3">Volver</a>
+    </div>
 </body>
 </html>

@@ -16,7 +16,7 @@
     (tiene-herramienta tijeras)
     (conectado jardin camino1)
   )
-  
+
   (:goal
     (and
       (cosechada planta1)

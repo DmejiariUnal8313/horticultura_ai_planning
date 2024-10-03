@@ -118,19 +118,30 @@ def generar_plan(request):
         domain = parser.parse_domain()
         problem = parser.parse_problem(domain)
 
-        # Generar la tarea manualmente
-        initial_state = problem.initial_state
-        goal = problem.goal
-        actions = domain.actions
+        # Generar la tarea
+        task = _ground(problem)
 
-        # Generar el plan manualmente
-        plan_steps = []
-        for action_name in actions:
-            # Aquí asumimos que cada acción es simplemente un nombre
-            plan_steps.append(action_name)
+        # Aplicar la heurística y buscar el plan
+        heuristic = BlindHeuristic(task)
+        plan = astar_search(task, heuristic)
+
+        # Convertir el plan a una lista de nombres de acciones
+        plan_steps = [str(action) for action in plan]
+
+        # Convertir objetos complejos a tipos de datos simples
+        initial_state_str = str(task.initial_state)
+        goal_str = str(task.goals)
+
+        # Agregar detalles del plan
+        plan_details = {
+            'problem_file': os.path.basename(problem_file),
+            'initial_state': initial_state_str,
+            'goal': goal_str,
+            'actions': plan_steps
+        }
 
         # Agregar el plan a la lista de planes
-        plans.append(plan_steps)
+        plans.append(plan_details)
 
     # Guardar los planes en la sesión
     request.session['plans'] = plans
@@ -140,16 +151,9 @@ def generar_plan(request):
 def ver_plan(request):
     """
     Muestra los planes generados guardados en la sesión.
-
-    Args:
-        request (HttpRequest): La solicitud HTTP.
-
-    Returns:
-        HttpResponse: La respuesta HTTP con los planes generados.
     """
     plans = request.session.get('plans', [])
-
-    return render(request, 'plan.html', {'plans': plans})
+    return render(request, 'ver_plan.html', {'plans': plans})
 
 def simulacion(request):
     """
