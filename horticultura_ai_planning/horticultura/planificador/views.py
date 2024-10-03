@@ -7,7 +7,6 @@ from pyperplan.search import astar_search
 from pyperplan.heuristics.blind import BlindHeuristic
 from pyperplan.heuristics.lm_cut import LmCutHeuristic
 
-
 # Definir una clase Node simple si no está disponible en pyperplan
 class Node:
     def __init__(self, state):
@@ -62,11 +61,15 @@ def heuristica(request):
         initial_node = Node(task.initial_state)
         heuristic_value = heuristic(initial_node)
 
+        # Convertir el estado inicial y los objetivos a cadenas de texto legibles
+        initial_state_str = "\n".join(sorted(str(state) for state in task.initial_state))
+        goal_str = "\n".join(sorted(str(goal) for goal in task.goals))
+
         # Añadir detalles al contenido de la respuesta
         heuristica_content += (
             f"Camino {i+1}:\n"
-            f"Estado inicial:\n{task.initial_state}\n\n"
-            f"Objetivos:\n{task.goals}\n\n"
+            f"Estado inicial:\n{initial_state_str}\n\n"
+            f"Objetivos:\n{goal_str}\n\n"
             f"Valor heurístico aplicado al estado inicial: {heuristic_value}\n\n"
         )
 
