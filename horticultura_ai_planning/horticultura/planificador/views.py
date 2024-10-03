@@ -42,7 +42,8 @@ def heuristica(request):
     problem_files = [
         os.path.join(base_dir, 'problem_jardin.pddl'),
         os.path.join(base_dir, 'problem_invernadero.pddl'),
-        os.path.join(base_dir, 'problem_huerto.pddl')
+        os.path.join(base_dir, 'problem_huerto.pddl'),
+        os.path.join(base_dir, 'problem.pddl')
     ]
 
     heuristica_content = ""
