@@ -129,8 +129,8 @@ def generar_plan(request):
         plan_steps = [str(action) for action in plan]
 
         # Convertir objetos complejos a tipos de datos simples
-        initial_state_str = str(task.initial_state)
-        goal_str = str(task.goals)
+        initial_state_str = "\n".join(sorted(str(fact) for fact in task.initial_state))
+        goal_str = "\n".join(sorted(str(goal) for goal in task.goals))
 
         # Agregar detalles del plan
         plan_details = {
