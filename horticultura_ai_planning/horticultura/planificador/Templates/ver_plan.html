@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Planes Generados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .plan {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .plan h2 {
+            color: #555;
+        }
+        .plan p {
+            margin: 5px 0;
+        }
+        .plan ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .plan ul li {
+            background-color: #e7f3fe;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .state, .goal {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .state p, .goal p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Planes Generados</h1>
+        {% for plan in plans %}
+            <div class="plan">
+                <h2>Plan para {{ plan.problem_file }}</h2>
+                <div class="state">
+                    <p><strong>Estado Inicial:</strong></p>
+                    <p>{{ plan.initial_state }}</p>
+                </div>
+                <div class="goal">
+                    <p><strong>Objetivo:</strong></p>
+                    <p>{{ plan.goal }}</p>
+                </div>
+                <p><strong>Acciones:</strong></p>
+                <ul>
+                    {% for action in plan.actions %}
+                        <li>{{ action }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
